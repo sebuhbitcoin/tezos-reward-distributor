@@ -30,28 +30,31 @@ Options
     4. Retry failed payments and exit.
 
 ``-R --release_override <int>``
-    Override ``NB_FREEZE_CYCLE`` value, which is 5 by default. Valid range is ``[-11,-1]``. Default value: ``0`` (with no effect). Last released payment cycle will be calculated based on the formula: ``current_cycle - (NB_FREEZE_CYCLE+1) - release_override``. Suitable for future payments providing a negative value.
+    Override ``NB_FREEZE_CYCLE`` value, which is 5 by default. Valid values are ``0``, ``-5``, ``-11``. Default value: ``0`` (with no effect). See :ref:`payout_timing`.
 
 ``-O --payment_offset <int>``
     Number of blocks to wait after a cycle starts before starting payments. This can be useful because cycle beginnings may be busy.
 
-``-N --network <MAINNET|FLORENCENET>``
-    Network name. Default value: ``MAINNET``. The current test network of Tezos is ``FLORENCENET``.
+``-N --network <MAINNET|HANGZHOU2NET>``
+    Network name. Default value: ``MAINNET``. The current test network of Tezos is ``HANGZHOU2NET``.
 
 ``-A --node_endpoint <node_url:port>``
     Node potentially with protocol prefix especially if TLS encryption is used. Default value: ``http://127.0.0.1:8732``. This is the main Tezos node used by the client for RPC queries and operation injections.
 
 ``-P --reward_data_provider <rpc|prpc|tzstats|tzkt>``
-    Source that provides all needed data for reward calculations. Default value: ``prpc``. If you prefer to use your own local node, defined with the ``-A`` option, for getting reward data you must set this option to ``rpc`` (the local node must be an archive node in this case). If you prefer using a public RPC node, please set the node URL using the ``-Ap`` option. An alternative for providing reward data is ``tzstats``, but pay attention for license in case of COMMERCIAL use!
+    Source that provides all needed data for reward calculations. Default value: ``tzkt`` (TzKT API). Set to ``rpc`` to use your own local node defined with the ``-A`` flag, (it must be an ARCHIVE node in this case). Set to ``prpc`` to use a public RPC node defined with the ``-Ap`` flag. An alternative for providing reward data is ``tzstats``, but pay attention for license in case of commercial use!
 
 ``-Ap --node_addr_public <url>``
-    Public node base URL. Default value: ``https://mainnet-tezos.giganode.io``. This argument will only be used in case the provider is set to `prpc`. This node will only be used to query reward data and delegator list. It must be an archive node.
+    Public node base URL. Default is ``https://mainnet-tezos.giganode.io``. This argument will only be used in case the reward provider is set to ``prpc``. This node will only be used to query reward data and delegator list. It must be an ARCHIVE node.
 
-``-r --reports_base <path>``
-    Directory to create reports. Default value: ``~/pymnt/reports``.
-
-``-f --config_dir <path>``
-    Directory to find baking configuration. Default value: ``~/pymnt/cfg``.
+``-b --base_directory <path>``
+    Directory for reports, configuration and logs. Default value: ``~/pymnt``.
+    The directory contains the following folders:
+    
+    1. ~/pymnt/cfg
+    2. ~/pymnt/simulations
+    3. ~/pymnt/reports
+    4. ~/pymnt/logs
 
 ``-D --dry_run``
     Run without injecting payments. Suitable for testing. Does not require locking.
@@ -83,8 +86,8 @@ Options
 ``--syslog``
     Log to syslog. Useful in daemon mode.
 
-``--log-file <path>``
-    Log output file.
+``--log_file <path>``
+    Application log output folder path and file name. By default the logs are placed into the --base_directory e.g.:: ``~/pymnt/logs/app.log``.
 
 Examples
 --------
@@ -115,23 +118,23 @@ Make pending payouts beginning from a cycle and exit:
 
     python3 src/main.py -C 300 -M 2 -V
 
-Run in dry-run mode on FLORENCENET, make payouts for cycle 300 and exit:
+Run in dry-run mode on GRANADANET, make payouts for cycle 300 and exit:
 
 ::
 
-    python3 src/main.py -D -N FLORENCENET -C 300 -M 3 -V
+    python3 src/main.py -D -N GRANADANET -C 300 -M 3 -V
 
-Run in dry-run mode on MAINNET, make payouts from cycle 300 onwards, for calculations use data provided by Tezos node RPC interface:
+Run in dry-run mode on MAINNET, make payouts from cycle 300 onwards, for calculations use data provided by local Tezos node RPC interface:
 
 ::
 
     python3 src/main.py -C 300 -P rpc -D -V
 
-Run in dry-run mode on MAINNET, make payouts only for cycle 300, for calculations use data provided by the TzKT API:
+Run in dry-run mode on MAINNET, make payouts only for cycle 300, for calculations use data provided by the public node RPC:
 
 ::
 
-    python3 src/main.py -C 300 -P tzkt -M 3 -V -D
+    python3 src/main.py -C 300 -P prpc -Ap https://mainnet-tezos.giganode.io -M 3 -V -D
 
 Run in dry-run mode on MAINNET, retry failed payouts only for cycle 300, for calculations use data provided by the TzStats API:
 
